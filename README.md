@@ -21,7 +21,7 @@ As a result, I will proof that the assumption is wrong and nodes are not grouped
 In this first fact, I'm going to:
 - Proof that my assumption is wrong. Points are not grouped per blocks.
 - Generate a file with blobs bounding boxes.
-- Implement a small visualization with leaflet and the previous file: [Check here for Faroe Islands](fact1/frontend/index.html)
+- Implement a small visualization with leaflet and the previous file: [Check here for Faroe Islands](https://angelcervera.github.io/osm-facts/)
 
 In the ```BlobHeader```, there is a ```indexdata``` that can contain information about the following blob, as the bounding box that
 contains all geo data. But this information is not standardized and is optional.
