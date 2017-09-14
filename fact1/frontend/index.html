@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+          integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+          crossorigin=""/>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #mapid {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="mapid"></div>
+
+<script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+        integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+        crossorigin=""></script>
+<script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+<script>
+    $( document ).ready(function() {
+
+        function createPolygon(bbox) {
+            var lowLeftLat = bbox[0];
+            var lowLeftLng = bbox[1];
+            var upRightLat = bbox[2];
+            var upRightLng = bbox[3];
+            return [ [lowLeftLat, lowLeftLng], [upRightLat, lowLeftLng], [upRightLat, upRightLng], [lowLeftLat, upRightLng] ]
+        }
+
+        jQuery.getScript("bboxes.js", function (script, textStatus, jqXHR) {
+            var map = new L.Map('mapid');
+            var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+            var osm = new L.TileLayer(osmUrl, {minZoom: 3, maxZoom: 12, attribution: osmAttrib});
+
+            map.setView(new L.LatLng(57.59588429999998, -14.003684000000007),3);
+            map.addLayer(osm);
+            for(idx=0; idx<bboxes.length; idx++) {
+                L.polygon(createPolygon(bboxes[idx]), {fill:false}).addTo(map);
+            }
+
+        })
+
+    });
+</script>
+</body>
+</html>
