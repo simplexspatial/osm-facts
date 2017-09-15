@@ -41,9 +41,22 @@ To execute the spark job that create the javascript array to use in the map:
 
 ```
 
-## Fact 2: TODO: Nodes are unique.
+## Fact 2: Unique IDs.
 
-Nodes are stored in separate blocks that streets, so nodes should be uniques.
-In this "Fact" I will check that this is true. 
+Every block contains unique types of entities. I supposed that Ids are uniques between entities.
 
+So in this fact I will check:
+- No Ids duplication between blocks (example: Same node  in different blocks )
+- No same Id used by two different types of entities (example: Way and node with same Id )
+
+To execute the spark job to count number of duplicates:
+```bash
+  ./bin/spark-submit \
+    --class com.acervera.osmfacts.fact2.Fact2Driver \
+    --master yarn \
+    --deploy-mode cluster \
+    --num-executors 5 \
+    --executor-cores 3 \
+    ~/fact2-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet
+```
 

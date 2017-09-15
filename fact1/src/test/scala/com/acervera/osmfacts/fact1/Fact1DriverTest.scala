@@ -15,9 +15,9 @@ class Fact1DriverTest extends WordSpec with GivenWhenThen {
 
       When("extract bounding data")
       val defaultConfig = new SparkConf().setMaster("local[4]")
+      val boundingData = Fact1Driver.calculateBoundingAreas(defaultConfig, input)
 
       Then("return 20 elements, because remove HeaderBlock and keep only OSMData with nodes.")
-      val boundingData = Fact1Driver.calculateBoundingAreas(defaultConfig, input)
       assert(boundingData.length == 20)
 
     }
