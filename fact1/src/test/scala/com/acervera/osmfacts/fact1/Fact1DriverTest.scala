@@ -1,20 +1,17 @@
 package com.acervera.osmfacts.fact1
 
-import com.acervera.osmfacts.CommonStuffTest
 import com.acervera.osmfacts.fact1.Fact1Driver.{BBox, Point}
 import org.apache.spark.SparkConf
 import org.scalatest.{GivenWhenThen, WordSpec}
 
-class Fact1DriverTest extends WordSpec with GivenWhenThen with CommonStuffTest {
-
-  val outRoot = s"${outputTemporalRoot}/fact1"
+class Fact1DriverTest extends WordSpec with GivenWhenThen {
 
   "Fact1DriverTest" should {
 
     "calculateBoundingAreas" in {
 
       Given("a set of 23 blob files")
-      val input = "fact1/src/test/resources/faroe-islands"
+      val input = "assets/osm/faroe-islands"
 
       When("extract bounding data")
       val defaultConfig = new SparkConf().setMaster("local[4]")
