@@ -70,6 +70,7 @@ lazy val fact3 = Project(id = "fact3", base = file("fact3")).
     test in assembly := {},
     libraryDependencies ++= Seq(
       "com.acervera.osm4scala" %% "osm4scala-core" % "1.0.1",
-      "org.apache.spark" %% "spark-core" % "2.2.0" % "provided"
+      "org.apache.spark" %% "spark-core" % "2.2.0" % "provided",
+      "com.github.pathikrit" %% "better-files" % "2.17.1" % "test"
     )
   )

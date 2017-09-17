@@ -2,7 +2,7 @@ package com.acervera.osmfacts.fact3
 
 import org.apache.spark.SparkConf
 import org.scalatest.{GivenWhenThen, WordSpec}
-
+import better.files._
 import com.acervera.osmfacts.fact3.Fact3Driver._
 
 class Fact3DriverTest extends WordSpec with GivenWhenThen {
@@ -22,6 +22,8 @@ class Fact3DriverTest extends WordSpec with GivenWhenThen {
       Fact3Driver.searchVerticesBetweenTheEnds(conf, input, output)
 
       Then("realise that there are shared nodes that are not ate the ends of the way.")
+      val lines = File(output).glob("**/part-*").map(_.lines)
+      assert(lines.length > 0)
 
     }
 
