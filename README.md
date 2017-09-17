@@ -60,3 +60,18 @@ To execute the spark job to count number of duplicates:
     ~/fact2-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet
 ```
 
+## Fact 3: No all connections between ways are at the ends of the way
+To define a network, the best way is define vertices and edges. In the case of OSM, the equivalence could be ```edges = ways``` and ```vertices = nodes at the ends of the way```.
+
+In this fact, we are going to proof that this is not the case in the osm files, because there are nodes used as connection between ways that are not at the ends.
+
+```bash
+  ./bin/spark-submit \
+    --class com.acervera.osmfacts.fact3.Fact3Driver \
+    --master yarn \
+    --deploy-mode cluster \
+    --num-executors 5 \
+    --executor-cores 3 \
+    --driver-java-options='-Dosm-facts.input=hdfs:///user/angelcervera/osm/blocks/planet -Dosm-facts.local-file-js-bounding=/home/angelcervera/planet/connections_not_at_the_ends' \
+    ~/fact3-assembly-0.1-SNAPSHOT.jar
+```

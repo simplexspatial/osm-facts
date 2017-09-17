@@ -40,6 +40,7 @@ object Fact2Driver {
   def searchNonUniqueIds(defaultConfig: SparkConf, input: String) = {
 
     val sparkConf = defaultConfig.setAppName("Search duplicates")
+    sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val sc = new SparkContext(sparkConf)
 
     try {

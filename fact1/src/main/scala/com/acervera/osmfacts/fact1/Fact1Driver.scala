@@ -87,6 +87,7 @@ object Fact1Driver {
   def calculateBoundingAreas(defaultConfig: SparkConf, input: String) = {
 
     val sparkConf = defaultConfig.setAppName("Bounding areas")
+    sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val sc = new SparkContext(sparkConf)
 
     try {
