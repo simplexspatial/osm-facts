@@ -74,3 +74,5 @@ In this fact, we are going to proof that this is not the case in the osm files, 
     --executor-cores 3 \
     ~/fact3-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet /home/angelcervera/planet/connections_not_at_the_ends
 ```
+
+[In the demo](https://angelcervera.github.io/osm-facts/) you can see how there are four ways (**red**, **black**, **green** and **fuchsia**) that have vertices as the ends, but the **blue** one contains the intersection in the middle. 
