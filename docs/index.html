@@ -30,6 +30,12 @@
         crossorigin="anonymous"></script>
 <script>
     $( document ).ready(function() {
+        var map = new L.Map('mapid');
+        var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+        var osm = new L.TileLayer(osmUrl, {minZoom: 3, maxZoom: 20, attribution: osmAttrib});
+        map.addLayer(osm);
+
 
         function createPolygon(bbox) {
             var lowLeftLat = bbox[0];
@@ -40,17 +46,17 @@
         }
 
         jQuery.getScript("bboxes.js", function (script, textStatus, jqXHR) {
-            var map = new L.Map('mapid');
-            var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-            var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
-            var osm = new L.TileLayer(osmUrl, {minZoom: 3, maxZoom: 12, attribution: osmAttrib});
-
-            map.setView(new L.LatLng(57.59588429999998, -14.003684000000007),3);
-            map.addLayer(osm);
-            for(idx=0; idx<bboxes.length; idx++) {
+            for(var idx=0; idx<bboxes.length; idx++) {
                 L.polygon(createPolygon(bboxes[idx]), {fill:false}).addTo(map);
             }
+        })
 
+        jQuery.getScript("intersections.js", function (script, textStatus, jqXHR) {
+            var colors = ['red','green','black','blue','fuchsia']
+            for(var wayIdx=0; wayIdx<fact3Ways.length; wayIdx++) {
+                L.polyline(fact3Ways[wayIdx], {color: colors[wayIdx],weight: 3}).addTo(map).addTo(map)
+            }
+            map.setView(new L.LatLng(fact3IntersectionPoint[0],fact3IntersectionPoint[1]),14);
         })
 
     });

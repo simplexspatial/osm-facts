@@ -35,19 +35,19 @@ object Fact3Driver {
     * Extract all nodes from the way, tagging if it is in the extreme or is isn't.
     *
     * @param way
-    * @return (nodeId, true if it's in the extreme)
+    * @return (nodeId, (wayId, true if it's in the extreme))
     */
-  def tagNodes(way: WayEntity): Seq[(Long, Seq[Boolean])] =
-    way.nodes.zipWithIndex.map { case(node, idx) => (node, Seq(idx==0 || idx==way.nodes.length-1))}
+  def tagNodes(way: WayEntity): Seq[(Long, Seq[ (Long, Boolean)])] =
+    way.nodes.zipWithIndex.map { case(node, idx) => (node, Seq((way.id, idx==0 || idx==way.nodes.length-1)) )}
 
   /**
     * Check that all are in the extreme.
     *
     *
-    * @param extreme
+    * @param ends
     * @return
     */
-  def areAllExtremes(extreme:Iterable[Boolean]): Boolean = extreme.forall(v => v)
+  def areAllAtTheEnds(ends:Iterable[(Long,Boolean)]): Boolean = ends.forall(v => v._2)
 
   /**
     * Extract all ways.
@@ -58,6 +58,7 @@ object Fact3Driver {
 
   /**
     * Extract all nodes that are connections between ways and are between the ends of the way.
+    * The output is going to be a CSV where first is the nodeId shared and the rest the list of ways.
     *
     * @param defaultConfig
     * @param input
@@ -68,17 +69,19 @@ object Fact3Driver {
     val conf = defaultConfig.setAppName("Check connections in extremes")
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val sc = new SparkContext(conf)
+
     try {
 
       val errorCounter = sc.longAccumulator
 
-      sc
+      val rddResult = sc
         .binaryFiles(input)
         .flatMap { case (path, binaryBlob) => extractWays(path, binaryBlob.toArray(), errorCounter) }
         .flatMap(tagNodes)
         .reduceByKey(_ ++ _) // aggregate by node id.
         .filter(_._2.size > 2) // Remove nodes that are not shared vertices.
-        .filter{ case(_, extremes) => ! areAllExtremes(extremes) } // Keep nodes with connection between the ends.
+        .filter{ case(_, theEnds) => ! areAllAtTheEnds(theEnds) } // Keep nodes with connection between the ends.
+        .map(intersections=> (intersections._1 +: intersections._2.map(_._1)).mkString(","))
         .saveAsTextFile(output)
 
     } finally {

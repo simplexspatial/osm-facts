@@ -28,8 +28,8 @@ class Fact3DriverTest extends WordSpec with GivenWhenThen {
     }
 
     "areAllExtremes" should {
-      "must detect non extreme" in assert(!areAllExtremes(Iterable(true, false, false, true)))
-      "must detect all extremes" in assert(areAllExtremes(Iterable(true, true, true, true)))
+      "must detect non extreme" in assert(!areAllAtTheEnds(Iterable((1,true), (2,false), (3,false), (4,true))))
+      "must detect all extremes" in assert(areAllAtTheEnds(Iterable((1,true), (2,true), (3,true), (4,true))))
     }
 
   }
