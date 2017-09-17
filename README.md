@@ -72,6 +72,5 @@ In this fact, we are going to proof that this is not the case in the osm files, 
     --deploy-mode cluster \
     --num-executors 5 \
     --executor-cores 3 \
-    --driver-java-options='-Dosm-facts.input=hdfs:///user/angelcervera/osm/blocks/planet -Dosm-facts.local-file-js-bounding=/home/angelcervera/planet/connections_not_at_the_ends' \
-    ~/fact3-assembly-0.1-SNAPSHOT.jar
+    ~/fact3-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet /home/angelcervera/planet/connections_not_at_the_ends
 ```
