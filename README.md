@@ -4,7 +4,7 @@ This projects contains checks and proofs of few non documented facts.
 Also, there are few tools to understand better the organization of PBFs files.
 
 You can browse, read and download the result of every "fact" proof, but you can also folk the project and use it for your own.
-To access to all this data I'm using angelcervera/osm4scala. At the moment, this library [does not support Spark out of the box](angelcervera/osm4scala#25), so I
+To access to all this data I'm using angelcervera/osm4scala. At the moment, this library [does not support Spark out of the box](https://github.com/angelcervera/osm4scala/issues/25), so I
 extracted all OSMData Blobs using one the examples in the library and upload all to [my home made cluster]() with Hadoop. All processes are
 going to use this data in Hadoop.
 
