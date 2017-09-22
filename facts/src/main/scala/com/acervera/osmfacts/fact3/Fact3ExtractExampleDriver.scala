@@ -1,42 +1,19 @@
 package com.acervera.osmfacts.fact3
 
-import com.acervera.osm4scala.EntityIterator
-import com.acervera.osm4scala.model.{NodeEntity, OSMEntity, OSMTypes, WayEntity}
-import com.acervera.osmfacts.fact3.Fact3Driver.log
-import org.apache.spark.util.LongAccumulator
+import com.acervera.osm4scala.model.{NodeEntity, OSMTypes, WayEntity}
+import com.acervera.osmfacts.FactsCommons
 import org.apache.spark.{SparkConf, SparkContext}
-import org.openstreetmap.osmosis.osmbinary.fileformat.Blob
-
-import scala.util.{Failure, Success, Try}
 
 /**
   * Passing a node and ways, extract all ways' coordinates and the node coordinate preparing it for the javascript demo.
   *
   * Used only from the integration test.
   */
-object Fact3ExtractExampleDriver {
+object Fact3ExtractExampleDriver extends FactsCommons {
 
   case class LatLng(lat: Double, lng: Double) {
     def toLatLongString = s"[$lat,$lng]"
   }
-
-  /**
-    * Transform the file into a blob
-    *
-    * @param path
-    * @param bin
-    * @param errorCounter
-    * @return
-    */
-  def parseBlob(path: String, bin: Array[Byte], errorCounter: LongAccumulator): Seq[OSMEntity] =
-    Try(EntityIterator.fromBlob(Blob.parseFrom(bin)).toSeq) match {
-      case Success(entities) => entities
-      case Failure(ex) => {
-        errorCounter.add(1)
-        log.error(s"Error reading blob file ${path}", ex)
-        Seq()
-      }
-    }
 
   def extractWays(defaultConfig: SparkConf, input: String, nodeIntersectionId: Long, wayIds: Seq[Long]) = {
 

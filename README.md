@@ -37,7 +37,7 @@ To execute the spark job that create the javascript array to use in the map:
     --num-executors 5 \
     --executor-cores 3 \
     --driver-java-options='-Dosm-facts.input=hdfs:///user/angelcervera/osm/blocks/planet -Dosm-facts.local-file-js-bounding=/home/angelcervera/planet/bboxes.js' \
-    ~/fact1-assembly-0.1-SNAPSHOT.jar
+    ~/facts-assembly-0.1-SNAPSHOT.jar
 
 ```
 
@@ -57,7 +57,7 @@ To execute the spark job to count number of duplicates:
     --deploy-mode cluster \
     --num-executors 5 \
     --executor-cores 3 \
-    ~/fact2-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet
+    ~/facts-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet
 ```
 
 ## Fact 3: No all connections between ways are at the ends of the way
@@ -72,7 +72,7 @@ In this fact, we are going to proof that this is not the case in the osm files, 
     --deploy-mode cluster \
     --num-executors 5 \
     --executor-cores 3 \
-    ~/fact3-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet /home/angelcervera/planet/connections_not_at_the_ends
+    ~/facts-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet /home/angelcervera/planet/connections_not_at_the_ends
 ```
 
 [In the demo](https://angelcervera.github.io/osm-facts/) you can see how there are four ways (**red**, **black**, **green** and **fuchsia**) that have all vertices at the ends, but the **blue** one contains the intersection in the middle. 

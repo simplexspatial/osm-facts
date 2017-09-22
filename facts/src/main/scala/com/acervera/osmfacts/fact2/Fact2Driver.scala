@@ -1,14 +1,11 @@
 package com.acervera.osmfacts.fact2
 
-import com.acervera.osm4scala.EntityIterator
+import com.acervera.osmfacts.FactsCommons
 import org.apache.log4j.LogManager
-import org.apache.spark.util.CollectionAccumulator
+import org.apache.spark.util.LongAccumulator
 import org.apache.spark.{SparkConf, SparkContext}
-import org.openstreetmap.osmosis.osmbinary.fileformat.Blob
 
-import scala.util.{Failure, Success, Try}
-
-object Fact2Driver {
+object Fact2Driver extends FactsCommons {
 
   var log = LogManager.getLogger("com.acervera.osmfacts.fact2.Fact2Driver")
 
@@ -20,15 +17,8 @@ object Fact2Driver {
     * @param errors
     * @return
     */
-  def extractIdsFromBlob(path: String, bin: Array[Byte], errors: CollectionAccumulator[String]): Seq[(Long, Int)] =
-    Try(EntityIterator.fromBlob(Blob.parseFrom(bin)).toSeq) match {
-      case Success(entities) => entities.map( entity => (entity.id,1) )
-      case Failure(ex) => {
-        errors.add(path)
-        log.error(s"Error reading blob file ${path}", ex)
-        Seq()
-      }
-    }
+  def extractIdsFromBlob(path: String, bin: Array[Byte], errors: LongAccumulator): Seq[(Long, Int)] =
+    parseBlob(path, bin, errors).map( entity => (entity.id,1) )
 
   /**
     * Count duplicates.
@@ -44,7 +34,7 @@ object Fact2Driver {
     val sc = new SparkContext(sparkConf)
 
     try {
-      val errorAcc = sc.collectionAccumulator[String]("error_files")
+      val errorAcc = sc.longAccumulator("error_files")
 
       sc.binaryFiles(input)
         .flatMap{case(name, portable) => extractIdsFromBlob(name, portable.toArray(), errorAcc) }

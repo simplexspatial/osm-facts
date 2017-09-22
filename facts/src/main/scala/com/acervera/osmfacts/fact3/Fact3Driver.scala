@@ -1,35 +1,14 @@
 package com.acervera.osmfacts.fact3
 
-import com.acervera.osm4scala.EntityIterator
-import com.acervera.osm4scala.model.{OSMEntity, OSMTypes, WayEntity}
+import com.acervera.osm4scala.model.{OSMTypes, WayEntity}
+import com.acervera.osmfacts.FactsCommons
 import org.apache.log4j.LogManager
 import org.apache.spark.util.LongAccumulator
 import org.apache.spark.{SparkConf, SparkContext}
-import org.openstreetmap.osmosis.osmbinary.fileformat.Blob
 
-import scala.util.{Failure, Success, Try}
-
-object Fact3Driver {
+object Fact3Driver extends FactsCommons {
 
   var log = LogManager.getLogger("com.acervera.osmfacts.fact3.Fact3Driver")
-
-  /**
-    * Transform the file into a blob
-    *
-    * @param path
-    * @param bin
-    * @param errorCounter
-    * @return
-    */
-  def parseBlob(path: String, bin: Array[Byte], errorCounter: LongAccumulator): Seq[OSMEntity] =
-    Try(EntityIterator.fromBlob(Blob.parseFrom(bin)).toSeq) match {
-      case Success(entities) => entities
-      case Failure(ex) => {
-        errorCounter.add(1)
-        log.error(s"Error reading blob file ${path}", ex)
-        Seq()
-      }
-    }
 
   /**
     * Extract all nodes from the way, tagging if it is in the extreme or is isn't.

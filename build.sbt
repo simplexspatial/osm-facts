@@ -30,46 +30,18 @@ lazy val commonSettings = Seq(
 
 )
 
-lazy val fact1 = Project(id = "fact1", base = file("fact1")).
+lazy val fact = Project(id = "facts", base = file("facts")).
   settings(
     commonSettings,
-    name := "fact1",
-    description := "Check blobs overlaps",
-    scalaVersion := "2.11.11",
-    mainClass in assembly := Some("com.acervera.osmfacts.fact1.Fact1Driver"),
-    test in assembly := {},
-    libraryDependencies ++= Seq(
-      "com.acervera.osm4scala" %% "osm4scala-core" % "1.0.1",
-      "com.iheart" %% "ficus" % "1.4.2",
-      "com.github.pathikrit" %% "better-files" % "2.17.1",
-      "org.apache.spark" %% "spark-core" % "2.2.0" % "provided"
-    )
-  )
-
-lazy val fact2 = Project(id = "fact2", base = file("fact2")).
-  settings(
-    commonSettings,
-    name := "fact2",
-    description := "Unique entities",
-    scalaVersion := "2.11.11",
-    mainClass in assembly := Some("com.acervera.osmfacts.fact2.Fact2Driver"),
-    test in assembly := {},
-    libraryDependencies ++= Seq(
-      "com.acervera.osm4scala" %% "osm4scala-core" % "1.0.1",
-      "org.apache.spark" %% "spark-core" % "2.2.0" % "provided"
-    )
-  )
-
-lazy val fact3 = Project(id = "fact3", base = file("fact3")).
-  settings(
-    commonSettings,
-    name := "fact3",
+    name := "facts",
     description := "Connections always in the extrem of the way",
     scalaVersion := "2.11.11",
     mainClass in assembly := Some("com.acervera.osmfacts.fact2.Fact2Driver"),
     test in assembly := {},
     libraryDependencies ++= Seq(
       "com.acervera.osm4scala" %% "osm4scala-core" % "1.0.1",
+      "com.iheart" %% "ficus" % "1.4.2",
+      "com.github.pathikrit" %% "better-files" % "2.17.1",
       "org.apache.spark" %% "spark-core" % "2.2.0" % "provided"
     )
   )

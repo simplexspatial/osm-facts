@@ -1,18 +1,20 @@
 package com.acervera.osmfacts.fact1
 
+import better.files._
 import com.acervera.osm4scala.EntityIterator
 import com.acervera.osm4scala.model._
+import com.acervera.osmfacts.FactsCommons
 import com.typesafe.config.{Config, ConfigFactory}
-import org.apache.log4j.LogManager
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.util.CollectionAccumulator
-import org.openstreetmap.osmosis.osmbinary.fileformat.Blob
 import net.ceedubs.ficus.Ficus._
-import better.files._
+import org.apache.log4j.LogManager
+import org.apache.spark.util.CollectionAccumulator
+import org.apache.spark.{SparkConf, SparkContext}
+import org.openstreetmap.osmosis.osmbinary.fileformat.Blob
 
 import scala.util.{Failure, Success, Try}
 
-object Fact1Driver {
+// TODO: REfactor to use FactsCommons
+object Fact1Driver extends FactsCommons {
 
   var log = LogManager.getLogger("com.acervera.osmfacts.fact1.Fact1Driver")
 
