@@ -35,7 +35,7 @@ To execute the spark job that create the javascript array to use in the map:
     --master yarn \
     --deploy-mode cluster \
     --num-executors 5 \
-    --executor-cores 3 \
+    --executor-cores 4 \
     --driver-java-options='-Dosm-facts.input=hdfs:///user/angelcervera/osm/blocks/planet -Dosm-facts.local-file-js-bounding=/home/angelcervera/planet/bboxes.js' \
     ~/facts-assembly-0.1-SNAPSHOT.jar
 
@@ -56,7 +56,7 @@ To execute the spark job to count number of duplicates:
     --master yarn \
     --deploy-mode cluster \
     --num-executors 5 \
-    --executor-cores 3 \
+    --executor-cores 4 \
     ~/facts-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet
 ```
 
@@ -71,8 +71,53 @@ In this fact, we are going to proof that this is not the case in the osm files, 
     --master yarn \
     --deploy-mode cluster \
     --num-executors 5 \
-    --executor-cores 3 \
+    --executor-cores 4 \
     ~/facts-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet /home/angelcervera/planet/connections_not_at_the_ends
 ```
 
-[In the demo](https://angelcervera.github.io/osm-facts/) you can see how there are four ways (**red**, **black**, **green** and **fuchsia**) that have all vertices at the ends, but the **blue** one contains the intersection in the middle. 
+[In the demo](https://angelcervera.github.io/osm-facts/) you can see how there are four ways (**red**, **black**, **green** and **fuchsia**) that have all vertices at the ends, but the **blue** one contains the intersection in the middle.
+
+
+## Fact 4: Small % of nodes are shared between ways.
+The idea of store nodes as a different entity and not as a part of the way is good idea if a high percentage of them are
+shared between ways.
+In this fact, we discover that this amount of data is so small that make non sense add complexity to the format to avoid
+replications of less that 2% of the data.
+ 
+```bash
+  ./bin/spark-submit \
+    --class com.acervera.osmfacts.metrics.MetricsDriver \
+    --master yarn \
+    --deploy-mode cluster \
+    --num-executors 4 \
+    --executor-cores 4 \
+    ~/facts-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet
+```
+
+### Feroe Islands metrics
+```
+Size: 1.5 M
+Total entities: 166929
+Error: 0
+Nodes: 153468 => 91.93609259026293% of entities
+Ways: 13303 => 7.969256390441445% of entities
+Relations: 158 => 0.09465101929562868% of entities
+Intersections: 1112 => 0.7245810201475226% of nodes
+```
+
+### Spain metrics
+```
+Size: 569.1 M
+Total entities: 86641722
+Error: 0
+Nodes: 78742432 => 90.88281047784346% of entities
+Ways: 7637442 => 8.814970228777309% of entities
+Relations: 261848 => 0.30221929337923364% of entities
+Intersections: 1516302 => 1.9256479149640693% of nodes
+```
+
+### Planet metrics
+```
+Size: 33.5 G
+Waiting
+```
