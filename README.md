@@ -89,8 +89,6 @@ replications of less that 2% of the data.
     --class com.acervera.osmfacts.metrics.MetricsDriver \
     --master yarn \
     --deploy-mode cluster \
-    --num-executors 4 \
-    --executor-cores 4 \
     ~/facts-assembly-0.1-SNAPSHOT.jar hdfs:///user/angelcervera/osm/blocks/planet
 ```
 
@@ -119,5 +117,10 @@ Intersections: 1516302 => 1.9256479149640693% of nodes
 ### Planet metrics
 ```
 Size: 33.5 G
-Waiting
+Total entities: 3976885170
+Error: 0
+Nodes: 3596320083 => 90.43057391068699% of entities
+Ways: 375990384 => 9.454393776222611% of entities
+Relations: 4574703 => 0.11503231309039783% of entities
+Intersections: 99191632 => 2.7581424820578184% of nodes
 ```
