@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Angel Cervera Claudio
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.acervera.osmfacts.fact4
 
 import com.acervera.osm4scala.model.{OSMTypes, RelationEntity, WayEntity}
@@ -10,29 +26,28 @@ object Fact4Driver extends FactsCommons {
 
   var log = LogManager.getLogger("com.acervera.osmfacts.fact4.Fact4Driver")
 
-
-
   def extraNodesFromRelation(relationEntity: RelationEntity): Seq[Long] = relationEntity.relations.map(_.id)
 
   def extraNodesFromWay(wayEntity: WayEntity): Seq[Long] = wayEntity.nodes
 
-
   /**
     * Extract all ways.
     */
-  def extractNodesIdAndUpdateCounters(path: String, bin: Array[Byte],
-                                      errorCounter: LongAccumulator,
-                                      nodesCounter: LongAccumulator,
-                                      waysCounter: LongAccumulator,
-                                      relationsCounter: LongAccumulator,
-                                      entitiesCounter: LongAccumulator): Seq[(Long, Int)] =
-
+  def extractNodesIdAndUpdateCounters(
+      path: String,
+      bin: Array[Byte],
+      errorCounter: LongAccumulator,
+      nodesCounter: LongAccumulator,
+      waysCounter: LongAccumulator,
+      relationsCounter: LongAccumulator,
+      entitiesCounter: LongAccumulator
+  ): Seq[(Long, Int)] =
     parseBlob(path, bin, errorCounter).flatMap(entity => {
       entitiesCounter.add(1)
       entity.osmModel match {
         case OSMTypes.Way => {
           waysCounter.add(1)
-          extraNodesFromWay(entity.asInstanceOf[WayEntity]).map( (_, 1) )
+          extraNodesFromWay(entity.asInstanceOf[WayEntity]).map((_, 1))
         }
         case OSMTypes.Node => {
           nodesCounter.add(1)
@@ -48,7 +63,7 @@ object Fact4Driver extends FactsCommons {
 
   def percentage(total: Long)(partial: Long): Double = partial * 100.0 / total
 
-  def buildReport(metrics: Metrics) = {
+  def buildReport(metrics: Metrics): String = {
 
     def percentageFromEntities = percentage(metrics.entities)(_)
 
@@ -72,7 +87,6 @@ object Fact4Driver extends FactsCommons {
     */
   def extractMetrics(defaultConfig: SparkConf, input: String): Metrics = {
 
-
     val conf = defaultConfig.setAppName("Extract metric")
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val sc = new SparkContext(conf)
@@ -87,8 +101,19 @@ object Fact4Driver extends FactsCommons {
 
       val intersectionsCounter = sc
         .binaryFiles(input)
-        .flatMap { case (path, binaryBlob) => extractNodesIdAndUpdateCounters(path, binaryBlob.toArray(), errorCounter, nodesCounter, waysCounter, relationsCounter, entitiesCounter) }
-        .reduceByKey(_+_)
+        .flatMap {
+          case (path, binaryBlob) =>
+            extractNodesIdAndUpdateCounters(
+              path,
+              binaryBlob.toArray(),
+              errorCounter,
+              nodesCounter,
+              waysCounter,
+              relationsCounter,
+              entitiesCounter
+            )
+        }
+        .reduceByKey(_ + _)
         .filter(_._2 > 2)
         .count()
 

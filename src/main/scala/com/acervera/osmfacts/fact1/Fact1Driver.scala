@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Angel Cervera Claudio
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.acervera.osmfacts.fact1
 
 import better.files._
@@ -18,92 +34,6 @@ object Fact1Driver extends FactsCommons {
 
   var log = LogManager.getLogger("com.acervera.osmfacts.fact1.Fact1Driver")
 
-  case class BBox(lowLeft:Point, upRight:Point) {
-    def toCoords = f"[${lowLeft.lat}%1.6f,${lowLeft.lng}%1.6f,${upRight.lat}%1.6f,${upRight.lng}%1.6f]"
-  }
-  case class Point(lng:Double, lat:Double)
-
-  /**
-    * Update the BBox in function of the location of the point.
-    *
-    * @param old Old BBox
-    * @param point Point that must be inside of the new bbox
-    * @return New updated BBox
-    */
-  def updateBBox(old: Option[BBox], point: Point): BBox = old match {
-    case None => BBox(point, point)
-    case Some(prev) => BBox(
-      upRight = Point(
-        lng = if (point.lng > prev.upRight.lng) point.lng else prev.upRight.lng,
-        lat = if (point.lat > prev.upRight.lat) point.lat else prev.upRight.lat
-      ),
-      lowLeft = Point(
-        lng = if (point.lng < prev.lowLeft.lng) point.lng else prev.lowLeft.lng,
-        lat = if (point.lat < prev.lowLeft.lat) point.lat else prev.lowLeft.lat
-      )
-    )
-  }
-
-  /**
-    * FRom a Blob binary format, extract the bounding area and calculate useful metrics.
-    *
-    * @param path
-    * @param bin
-    * @param errors
-    * @return
-    */
-  def extractBoundingDataFromBlob(path: String, bin: Array[Byte], errors: CollectionAccumulator[String]): Option[BBox] =
-    Try(EntityIterator.fromBlob(Blob.parseFrom(bin)).toSeq) match {
-      case Success(entities) => calculateBoundingAreas(entities)
-      case Failure(ex) => {
-        errors.add(path)
-        log.error(s"Error reading blob file ${path}", ex)
-        None
-      }
-    }
-
-  /**
-    * Calculate the BBox for a sequence of Entities.
-    *
-    * @param entities
-    * @return
-    */
-  def calculateBoundingAreas(entities: Seq[OSMEntity]): Option[BBox] =
-    entities.foldLeft(Option.empty[BBox]){ case(prev, entity) => {
-      entity.osmModel match {
-        case OSMTypes.Node => {
-          val node = entity.asInstanceOf[NodeEntity]
-          Some(updateBBox(prev,Point(node.longitude, node.latitude)))
-        }
-        case _ => prev
-      }
-    }}
-
-  /**
-    * Generate a list of BBoxes for the full data set.
-    *
-    * @param defaultConfig
-    * @param input
-    * @return
-    */
-  def calculateBoundingAreas(defaultConfig: SparkConf, input: String) = {
-
-    val sparkConf = defaultConfig.setAppName("Bounding areas")
-    sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    val sc = new SparkContext(sparkConf)
-
-    try {
-      val errorAcc = sc.collectionAccumulator[String]("error_files")
-
-      sc.binaryFiles(input)
-        .flatMap{case(name, portable) => extractBoundingDataFromBlob(name, portable.toArray(), errorAcc) }
-        .collect()
-    } finally {
-      if (!sc.isStopped) sc.stop()
-    }
-
-  }
-
   /**
     * Two typesafe config style parameters:
     *
@@ -120,15 +50,101 @@ object Fact1Driver extends FactsCommons {
     val input = appConfig.as[String]("osm-facts.input")
     val output = appConfig.as[String]("osm-facts.local-file-js-bounding")
 
-
     val sparkConfig = new SparkConf()
     val boundingBoxes = calculateBoundingAreas(sparkConfig, input)
 
-    val js = "var bboxes = " + boundingBoxes.map(_.toCoords).mkString("[",",","]")
+    val js = "var bboxes = " + boundingBoxes.map(_.toCoords).mkString("[", ",", "]")
     val outFile = File(output)
     outFile.parent.createDirectories()
     outFile.overwrite(js)
 
   }
+
+  /**
+    * Generate a list of BBoxes for the full data set.
+    *
+    * @param defaultConfig
+    * @param input
+    * @return
+    */
+  def calculateBoundingAreas(defaultConfig: SparkConf, input: String): Array[BBox] = {
+
+    val sparkConf = defaultConfig.setAppName("Bounding areas")
+    sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+    val sc = new SparkContext(sparkConf)
+
+    try {
+      val errorAcc = sc.collectionAccumulator[String]("error_files")
+
+      sc.binaryFiles(input)
+        .flatMap { case (name, portable) => extractBoundingDataFromBlob(name, portable.toArray(), errorAcc) }
+        .collect()
+    } finally {
+      if (!sc.isStopped) sc.stop()
+    }
+
+  }
+
+  /**
+    * FRom a Blob binary format, extract the bounding area and calculate useful metrics.
+    *
+    * @param path
+    * @param bin
+    * @param errors
+    * @return
+    */
+  def extractBoundingDataFromBlob(path: String, bin: Array[Byte], errors: CollectionAccumulator[String]): Option[BBox] =
+    Try(EntityIterator.fromBlob(Blob.parseFrom(bin)).toSeq) match {
+      case Success(entities) => calculateBoundingAreas(entities)
+      case Failure(ex) =>
+        errors.add(path)
+        log.error(s"Error reading blob file ${path}", ex)
+        None
+    }
+
+  /**
+    * Calculate the BBox for a sequence of Entities.
+    *
+    * @param entities
+    * @return
+    */
+  def calculateBoundingAreas(entities: Seq[OSMEntity]): Option[BBox] =
+    entities.foldLeft(Option.empty[BBox]) {
+      case (prev, entity) =>
+        entity.osmModel match {
+          case OSMTypes.Node =>
+            val node = entity.asInstanceOf[NodeEntity]
+            Some(updateBBox(prev, Point(node.longitude, node.latitude)))
+          case _ => prev
+        }
+    }
+
+  /**
+    * Update the BBox in function of the location of the point.
+    *
+    * @param old Old BBox
+    * @param point Point that must be inside of the new bbox
+    * @return New updated BBox
+    */
+  def updateBBox(old: Option[BBox], point: Point): BBox = old match {
+    case None => BBox(point, point)
+    case Some(prev) =>
+      BBox(
+        upRight = Point(
+          lng = if (point.lng > prev.upRight.lng) point.lng else prev.upRight.lng,
+          lat = if (point.lat > prev.upRight.lat) point.lat else prev.upRight.lat
+        ),
+        lowLeft = Point(
+          lng = if (point.lng < prev.lowLeft.lng) point.lng else prev.lowLeft.lng,
+          lat = if (point.lat < prev.lowLeft.lat) point.lat else prev.lowLeft.lat
+        )
+      )
+  }
+
+  case class BBox(lowLeft: Point, upRight: Point) {
+    def toCoords: String = f"[${lowLeft.lat}%1.6f,${lowLeft.lng}%1.6f,${upRight.lat}%1.6f,${upRight.lng}%1.6f]"
+  }
+
+  case class Point(lng: Double, lat: Double)
 
 }
